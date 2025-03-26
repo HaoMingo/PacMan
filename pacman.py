@@ -1,20 +1,30 @@
-# Build Pac-Man from Scratch in Python with PyGame!!
+
 import copy
+#hier importeer je de board file
 from board import boards
-import pygame
 import math
+
+#eerst import je pygame in de dimensions van je game
+import pygame
+
 
 pygame.init()
 
 WIDTH = 900
 HEIGHT = 950
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
+
+#dit controleert de snelheid het spel zich afspeelt
 timer = pygame.time.Clock()
 fps = 60
+
+#de textfond in de game zelf.
 font = pygame.font.Font('freesansbold.ttf', 20)
 level = copy.deepcopy(boards)
 color = 'blue'
 PI = math.pi
+
+#dit zijn alle 5 images die de players zal gebruiken en de ghosts.
 player_images = []
 for i in range(1, 5):
     player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)))
@@ -24,8 +34,11 @@ inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.p
 clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
+
+#dit is de starting position voor de player
 player_x = 450
 player_y = 663
+
 direction = 0
 blinky_x = 56
 blinky_y = 58
@@ -41,8 +54,10 @@ clyde_y = 438
 clyde_direction = 2
 counter = 0
 flicker = False
-# R, L, U, D
+
+# voor als je naar een richting op kan gaan in het begin van de game
 turns_allowed = [False, False, False, False]
+
 direction_command = 0
 player_speed = 2
 score = 0
@@ -693,10 +708,12 @@ def check_collisions(scor, power, power_count, eaten_ghosts):
             eaten_ghosts = [False, False, False, False]
     return scor, power, power_count, eaten_ghosts
 
-
+#hier begin je je board te tekenen.
 def draw_board():
     num1 = ((HEIGHT - 50) // 32)
     num2 = (WIDTH // 30)
+
+    #dit begint een nested for loop, ook wel een loop in een loop, voor allemaal levels.
     for i in range(len(level)):
         for j in range(len(level[i])):
             if level[i][j] == 1:
@@ -726,9 +743,10 @@ def draw_board():
                 pygame.draw.line(screen, 'white', (j * num2, i * num1 + (0.5 * num1)),
                                  (j * num2 + num2, i * num1 + (0.5 * num1)), 3)
 
-
+#hier begint de functie voor de player zelf.
 def draw_player():
     # 0-RIGHT, 1-LEFT, 2-UP, 3-DOWN
+    #in dit stukje krijg je een counter voor welke foto je zal krijgen per frame. Hier gebeurd ook het roteren en draaiien van de foto, zodat de player niet alleen 1 kant op kijkt.
     if direction == 0:
         screen.blit(player_images[counter // 5], (player_x, player_y))
     elif direction == 1:
@@ -739,12 +757,14 @@ def draw_player():
         screen.blit(pygame.transform.rotate(player_images[counter // 5], 270), (player_x, player_y))
 
 
+#dit checkt de collision zone van de player image zelf
 def check_position(centerx, centery):
     turns = [False, False, False, False]
     num1 = (HEIGHT - 50) // 32
     num2 = (WIDTH // 30)
     num3 = 15
-    # check collisions based on center x and center y of player +/- fudge number
+
+    #dit is een check als er iets achter je staat.
     if centerx // 30 < 29:
         if direction == 0:
             if level[centery // num1][(centerx - num3) // num2] < 3:
@@ -879,8 +899,10 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
             clyd_target = return_target
     return [blink_target, ink_target, pink_target, clyd_target]
 
-
+#dit is de gameloop
 run = True
+
+#hier krijg je de ticks per frame zodat de player niet alleen stil staat, maar dat hij ook door alle player images gaat. (mond open, mond dicht, ect)
 while run:
     timer.tick(fps)
     if counter < 19:
@@ -902,8 +924,11 @@ while run:
     else:
         moving = True
 
+    #hier creeer je de board door "draw_board" die je zelf heb gemaakt
     screen.fill('black')
     draw_board()
+
+    #de hitboxs voor je player
     center_x = player_x + 23
     center_y = player_y + 24
     if powerup:
@@ -1139,9 +1164,11 @@ while run:
         eaten_ghost[3] = True
         score += (2 ** eaten_ghost.count(True)) * 100
 
+    #dit is een built-in pygame module.en dit zorgt ervoor dat de infinite gameloop kan stoppen door op het kruisje te klikken en bijvoorbeeld ook de arrows op je keyboard voor movement.
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+    #dit zijn de controls voor je player
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 direction_command = 0
