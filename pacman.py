@@ -126,12 +126,18 @@ class Ghost:
 
         #gecontroleerd of het spook zich binnen de grenzen van de map bevindt
         if 0 < self.center_x // 30 < 29:
+
+            #als het vakje onder de ghost, de poort naar het speciale vakje is, kan die erin
             if level[(self.center_y - num3) // num1][self.center_x // num2] == 9:
                 self.turns[2] = True
+
+            #als het vakje links een waarde kleiner dan 3 heeft kan de ghost daarheen bewegen
             if level[self.center_y // num1][(self.center_x - num3) // num2] < 3 \
                     or (level[self.center_y // num1][(self.center_x - num3) // num2] == 9 and (
                     self.in_box or self.dead)):
                 self.turns[1] = True
+
+            #als de ghost verticaal beweegt wordt het gecontroleerd als het horizontaal kan bewegen. Ook wanneer de ghost horizontaal beweegt, checkt het als die verticaal kan bewegen
             if level[self.center_y // num1][(self.center_x + num3) // num2] < 3 \
                     or (level[self.center_y // num1][(self.center_x + num3) // num2] == 9 and (
                     self.in_box or self.dead)):
@@ -145,6 +151,7 @@ class Ghost:
                     self.in_box or self.dead)):
                 self.turns[2] = True
 
+            #omhoog of omlaag beweegt, kijkt deze code of het ook naar links of rechts kan
             if self.direction == 2 or self.direction == 3:
                 if 12 <= self.center_x % num2 <= 18:
                     if level[(self.center_y + num3) // num1][self.center_x // num2] < 3 \
@@ -165,6 +172,7 @@ class Ghost:
                             self.in_box or self.dead)):
                         self.turns[0] = True
 
+            #als hetde ghost naar links of rechts beweegt kijkt deze code of het ook omhoog of omlaag kan bewegen
             if self.direction == 0 or self.direction == 1:
                 if 12 <= self.center_x % num2 <= 18:
                     if level[(self.center_y + num3) // num1][self.center_x // num2] < 3 \
@@ -184,18 +192,25 @@ class Ghost:
                             or (level[self.center_y // num1][(self.center_x + num3) // num2] == 9 and (
                             self.in_box or self.dead)):
                         self.turns[0] = True
+
+        #in dat geval mag kan de ghost naar links en rechts bewegen
         else:
             self.turns[0] = True
             self.turns[1] = True
+
+        #controle als de x/y-coördinaten van de ghost zich binnen de startbox bevind
         if 350 < self.x_pos < 550 and 370 < self.y_pos < 480:
             self.in_box = True
+
+        # geeft aan als de ghost in de startbox zit 
         else:
             self.in_box = False
         return self.turns, self.in_box
 
+    #deze functie bepaalt hoe het orange spook beweegt. de code bestaat uit 4 stukken voor elke bewegingsrichting
     def move_clyde(self):
-        # r, l, u, d
-        # clyde is going to turn whenever advantageous for pursuit
+
+        #controle als de ghost naar rechts kan
         if self.direction == 0:
             if self.target[0] > self.x_pos and self.turns[0]:
                 self.x_pos += self.speed
@@ -227,6 +242,8 @@ class Ghost:
                     self.y_pos -= self.speed
                 else:
                     self.x_pos += self.speed
+
+        #controle als die naar links kan
         elif self.direction == 1:
             if self.target[1] > self.y_pos and self.turns[3]:
                 self.direction = 3
@@ -260,6 +277,8 @@ class Ghost:
                     self.y_pos -= self.speed
                 else:
                     self.x_pos -= self.speed
+
+        #controle als die naar boven kan
         elif self.direction == 2:
             if self.target[0] < self.x_pos and self.turns[1]:
                 self.direction = 1
@@ -295,6 +314,8 @@ class Ghost:
                     self.x_pos -= self.speed
                 else:
                     self.y_pos -= self.speed
+
+        #controle als die naar beneden kan
         elif self.direction == 3:
             if self.target[1] > self.y_pos and self.turns[3]:
                 self.y_pos += self.speed
@@ -326,15 +347,19 @@ class Ghost:
                     self.x_pos -= self.speed
                 else:
                     self.y_pos += self.speed
+
+        #als de ghost door de linkerkant van het scherm verlaat komt het aan de rechterkant weer tevoorschijn
         if self.x_pos < -30:
             self.x_pos = 900
         elif self.x_pos > 900:
             self.x_pos - 30
         return self.x_pos, self.y_pos, self.direction
 
+    #dit herhaalt zich voor elke ghost type, maar sommige hebben meer checks, sommige hebben meer checks waardoor de ghosts apart allemaal verschillende soort gedrag tonen
+
+    #deze functie bepaalt hoe Blinky, het rode spook beweegt, het is het snelste spook en volgt de player direct zonder rare bewegingen
     def move_blinky(self):
-        # r, l, u, d
-        # blinky is going to turn whenever colliding with walls, otherwise continue straight
+       
         if self.direction == 0:
             if self.target[0] > self.x_pos and self.turns[0]:
                 self.x_pos += self.speed
@@ -438,9 +463,9 @@ class Ghost:
             self.x_pos - 30
         return self.x_pos, self.y_pos, self.direction
 
+    #Deze functie bepaalt hoe de blauwe ghost zich beweegt, inky heeft veel meer checks dan bijvoorbeeld de snelle blinky
     def move_inky(self):
-        # r, l, u, d
-        # inky turns up or down at any point to pursue, but left and right only on collision
+        
         if self.direction == 0:
             if self.target[0] > self.x_pos and self.turns[0]:
                 self.x_pos += self.speed
@@ -561,8 +586,7 @@ class Ghost:
         return self.x_pos, self.y_pos, self.direction
 
     def move_pinky(self):
-        # r, l, u, d
-        # inky is going to turn left or right whenever advantageous, but only up or down on collision
+      
         if self.direction == 0:
             if self.target[0] > self.x_pos and self.turns[0]:
                 self.x_pos += self.speed
@@ -685,38 +709,60 @@ class Ghost:
             self.x_pos - 30
         return self.x_pos, self.y_pos, self.direction
 
-
+#verantwoordelijk voor het tekenen van verschillende visuele elementen
 def draw_misc():
+
+    #Zet de score om in een tekstweergave
     score_text = font.render(f'Score: {score}', True, 'white')
     screen.blit(score_text, (10, 920))
+
+    #Als de speler een power-up heeft
     if powerup:
         pygame.draw.circle(screen, 'blue', (140, 930), 15)
+
+    #Dit geeft de player een indicatie van hoeveel levens hij heeft
     for i in range(lives):
         screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
+
+    #dit is wanneer de player de game heeft verloren
     if game_over:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300],0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
         gameover_text = font.render('Game over! Space bar to restart!', True, 'red')
         screen.blit(gameover_text, (100, 300))
+
+    #dit is wanneer de player de game heeft gewonnen
     if game_won:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300],0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
         gameover_text = font.render('Victory! Space bar to restart!', True, 'green')
         screen.blit(gameover_text, (100, 300))
 
-
+#functie check_collisions() controleert botsingen van de player
 def check_collisions(scor, power, power_count, eaten_ghosts):
     num1 = (HEIGHT - 50) // 32
     num2 = WIDTH // 30
+
+    #zit de player wel in de border van de map
     if 0 < player_x < 870:
+
+        #Controleert als de player op een stipplek staat en dan wordt het stipje verwijderd + 10 punten
         if level[center_y // num1][center_x // num2] == 1:
             level[center_y // num1][center_x // num2] = 0
             scor += 10
+
+        #controleert als de player op een powerup staat, verwijdert dan de powerup + 50 points
         if level[center_y // num1][center_x // num2] == 2:
             level[center_y // num1][center_x // num2] = 0
             scor += 50
+
+            #activeer dat player ghosts kan opeten
             power = True
+
+            #reset de timer van je powerup
             power_count = 0
+
+            #reset de ghosts zelf zodat ze opnieuw opgegeten kunnen worden
             eaten_ghosts = [False, False, False, False]
     return scor, power, power_count, eaten_ghosts
 
@@ -917,6 +963,8 @@ run = True
 #hier krijg je de ticks per frame zodat de player niet alleen stil staat, maar dat hij ook door alle player images gaat. (mond open, mond dicht, ect)
 while run:
     timer.tick(fps)
+
+    #Eerste 4 frames: flicker = True. De volgende 16 frames: flicker = False. dit zorgt ervoor dat een object soms verdwijnt en weer verschijnt
     if counter < 19:
         counter += 1
         if counter > 3:
@@ -924,16 +972,23 @@ while run:
     else:
         counter = 0
         flicker = True
+
+    #ditbetekent dat de player tijdelijk ghosts kan eten voordat ze weer normaal worden
     if powerup and power_counter < 600:
         power_counter += 1
     elif powerup and power_counter >= 600:
         power_counter = 0
         powerup = False
         eaten_ghost = [False, False, False, False]
+
+    #dit voorkomt dat het spel gelijk begint door te tellen voor 3 secondes. (180/60 fps = 3 sec)
     if startup_counter < 180 and not game_over and not game_won:
+
+        #niks beweegt
         moving = False
         startup_counter += 1
     else:
+        #alles begint te bewegen
         moving = True
 
     #hier creeer je de board door "draw_board" die je zelf heb gemaakt
@@ -944,9 +999,11 @@ while run:
     center_x = player_x + 23
     center_y = player_y + 24
     if powerup:
-        ghost_speeds = [1, 1, 1, 1]
+        ghost_speeds = [1, 1, 1, 1] #ghost bewegen langzamer
     else:
-        ghost_speeds = [2, 2, 2, 2]
+        ghost_speeds = [2, 2, 2, 2] #normale snelheid als er geen powerup is
+
+    #Wanneer een ghost wordt opgegeten wordt die niet meer vertraagd door de powerup
     if eaten_ghost[0]:
         ghost_speeds[0] = 2
     if eaten_ghost[1]:
@@ -955,6 +1012,8 @@ while run:
         ghost_speeds[2] = 2
     if eaten_ghost[3]:
         ghost_speeds[3] = 2
+
+    #als een host dood is rent die sneller terug naar hun speciale zone
     if blinky_dead:
         ghost_speeds[0] = 4
     if inky_dead:
@@ -965,12 +1024,17 @@ while run:
         ghost_speeds[3] = 4
 
     game_won = True
+
+    #spel gaat door zolang er nog puntjes of powerups over zijn
     for i in range(len(level)):
         if 1 in level[i] or 2 in level[i]:
             game_won = False
 
+    #dit zorgt ervoor dat de pacman op het scherm wordt weergegeven
     player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 20, 2)
     draw_player()
+
+    #hier krijgen alle ghosts apart verschillende eigenschappen en beginnen te reageren op de player
     blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_img, blinky_direction, blinky_dead,
                    blinky_box, 0)
     inky = Ghost(inky_x, inky_y, targets[1], ghost_speeds[1], inky_img, inky_direction, inky_dead,
@@ -980,11 +1044,16 @@ while run:
     clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speeds[3], clyde_img, clyde_direction, clyde_dead,
                   clyde_box, 3)
     draw_misc()
+
+    #hierdoor volgen de ghosts de pacman
     targets = get_targets(blinky_x, blinky_y, inky_x, inky_y, pinky_x, pinky_y, clyde_x, clyde_y)
 
+    #player beweegt en kan draaien waar het mag
     turns_allowed = check_position(center_x, center_y)
     if moving:
         player_x, player_y = move_player(player_x, player_y)
+
+        #ghosts volgen hun AI tenzij ze dood zijn
         if not blinky_dead and not blinky.in_box:
             blinky_x, blinky_y, blinky_direction = blinky.move_blinky()
         else:
@@ -999,7 +1068,8 @@ while run:
             inky_x, inky_y, inky_direction = inky.move_clyde()
         clyde_x, clyde_y, clyde_direction = clyde.move_clyde()
     score, powerup, power_counter, eaten_ghost = check_collisions(score, powerup, power_counter, eaten_ghost)
-    # add to if not powerup to check if eaten ghosts
+
+    #Als player een ghost raakt zonder powerup verlies je een leven
     if not powerup:
         if (player_circle.colliderect(blinky.rect) and not blinky.dead) or \
                 (player_circle.colliderect(inky.rect) and not inky.dead) or \
@@ -1159,6 +1229,8 @@ while run:
             game_over = True
             moving = False
             startup_counter = 0
+
+    #als de player nu een ghost raakt met een powerup krijg je punten. de punten worden steeds meer als je ghosts achter elkaar opeet
     if powerup and player_circle.colliderect(blinky.rect) and not blinky.dead and not eaten_ghost[0]:
         blinky_dead = True
         eaten_ghost[0] = True
@@ -1190,15 +1262,21 @@ while run:
                 direction_command = 2
             if event.key == pygame.K_DOWN:
                 direction_command = 3
+
+            #stuk code regelt het resetten van het spel wanneer de spatiebalk wordt gekilkt na een game over of als je hebt gewonnen
             if event.key == pygame.K_SPACE and (game_over or game_won):
                 powerup = False
                 power_counter = 0
                 lives -= 1
                 startup_counter = 0
+
+                #begin spawn van je pacman
                 player_x = 450
                 player_y = 663
                 direction = 0
                 direction_command = 0
+
+                #reset alle ghosts naar hun spawnpoint
                 blinky_x = 56
                 blinky_y = 58
                 blinky_direction = 0
@@ -1211,17 +1289,24 @@ while run:
                 clyde_x = 440
                 clyde_y = 438
                 clyde_direction = 2
+
+                #alle ghosts zijn weer levend
                 eaten_ghost = [False, False, False, False]
                 blinky_dead = False
                 inky_dead = False
                 clyde_dead = False
                 pinky_dead = False
+
+                #score en levens worden weer opnieuw ingevoerd
                 score = 0
                 lives = 3
                 level = copy.deepcopy(boards)
+
+                #je hebt niet meer gewonnen of verloren
                 game_over = False
                 game_won = False
 
+        #de beweging richtingen
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_RIGHT and direction_command == 0:
                 direction_command = direction
@@ -1232,6 +1317,7 @@ while run:
             if event.key == pygame.K_DOWN and direction_command == 3:
                 direction_command = direction
 
+    #als je wel kan draaiien
     if direction_command == 0 and turns_allowed[0]:
         direction = 0
     if direction_command == 1 and turns_allowed[1]:
@@ -1241,11 +1327,13 @@ while run:
     if direction_command == 3 and turns_allowed[3]:
         direction = 3
 
+    #als de player uit het scherm gaat aan ene kant wordt het weer aan de andere kant gezet
     if player_x > 900:
         player_x = -47
     elif player_x < -50:
         player_x = 897
 
+    #dit zorgt ervoor dat de ghosts weer tot leven komen als ze de ghostbox binnengaan nadat de player ze heeft opgegeten tijdens een powerup
     if blinky.in_box and blinky_dead:
         blinky_dead = False
     if inky.in_box and inky_dead:
@@ -1259,4 +1347,3 @@ while run:
 pygame.quit()
 
 
-# sound effects, restart and winning messages
