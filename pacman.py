@@ -822,7 +822,7 @@ def check_position(centerx, centery):
     num2 = (WIDTH // 30)
     num3 = 15
 
-    #dit is een check als er iets achter je staat.
+    #checks als er geen muur staat. geen muur = bewegen mogelijk. dit voor alle kanten, links, rechts, omhoog en omlaag.
     if centerx // 30 < 29:
         if direction == 0:
             if level[centery // num1][(centerx - num3) // num2] < 3:
@@ -838,34 +838,46 @@ def check_position(centerx, centery):
                 turns[2] = True
 
         if direction == 2 or direction == 3:
+            
+            #als player tussen twee tegels zit, wordt het extra gechecked als het kan draaiien
             if 12 <= centerx % num2 <= 18:
+                
                 if level[(centery + num3) // num1][centerx // num2] < 3:
                     turns[3] = True
                 if level[(centery - num3) // num1][centerx // num2] < 3:
                     turns[2] = True
+
+            #als player tussen twee tegels zit, wordt het extra gechecked als het kan draaiien
             if 12 <= centery % num1 <= 18:
                 if level[centery // num1][(centerx - num2) // num2] < 3:
                     turns[1] = True
                 if level[centery // num1][(centerx + num2) // num2] < 3:
                     turns[0] = True
         if direction == 0 or direction == 1:
+
+            #als player tussen twee tegels zit, wordt het extra gechecked als het kan draaiien
             if 12 <= centerx % num2 <= 18:
                 if level[(centery + num1) // num1][centerx // num2] < 3:
                     turns[3] = True
                 if level[(centery - num1) // num1][centerx // num2] < 3:
                     turns[2] = True
+
+            #als player tussen twee tegels zit, wordt het extra gechecked als het kan draaiien
             if 12 <= centery % num1 <= 18:
                 if level[centery // num1][(centerx - num3) // num2] < 3:
                     turns[1] = True
                 if level[centery // num1][(centerx + num3) // num2] < 3:
                     turns[0] = True
+
+    #dit is bij de rand van de scherm en als hij door de tunnel kan en aan de andere kant van het scherm weer uit kan komen
     else:
         turns[0] = True
         turns[1] = True
 
+    #dit geeft een lijst met alle mogelijke richtingen terug
     return turns
 
-
+#functie checkt de richting en beweegt de pacman alleen als het kan
 def move_player(play_x, play_y):
     # r, l, u, d
     if direction == 0 and turns_allowed[0]:
@@ -878,7 +890,7 @@ def move_player(play_x, play_y):
         play_y += player_speed
     return play_x, play_y
 
-
+#bepaalt de beweegdoelen van de spoken
 def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
     if player_x < 450:
         runaway_x = 900
@@ -888,9 +900,10 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
         runaway_y = 900
     else:
         runaway_y = 0
-    return_target = (380, 400)
+    return_target = (380, 400) #dit zorgt ervoor dat de ghosts naar de randen bewegen in het begin
+    
     if powerup:
-        if not blinky.dead and not eaten_ghost[0]:
+        if not blinky.dead and not eaten_ghost[0]: #hier rent de ghost weg als de pacman een powerup heeft
             blink_target = (runaway_x, runaway_y)
         elif not blinky.dead and eaten_ghost[0]:
             if 340 < blink_x < 560 and 340 < blink_y < 500:
