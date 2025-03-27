@@ -58,9 +58,13 @@ flicker = False
 # voor als je naar een richting op kan gaan in het begin van de game
 turns_allowed = [False, False, False, False]
 
+#richting en snelheid van de player + score
+
 direction_command = 0
 player_speed = 2
 score = 0
+
+#hier krijg je de powerup als de player en checkt het als de ghosts dood zijn of niet
 powerup = False
 power_counter = 0
 eaten_ghost = [False, False, False, False]
@@ -74,14 +78,17 @@ inky_box = False
 clyde_box = False
 pinky_box = False
 moving = False
+
+#snelheid van de ghosts, je begin levens, en als je de game heb gewonnen of verloren
 ghost_speeds = [2, 2, 2, 2]
 startup_counter = 0
 lives = 3
 game_over = False
 game_won = False
 
-
+#dit creeert de ghosts klasse
 class Ghost:
+    #eigenschappen van een spook: positie, snelheid, afbeelding, richting en collision controle
     def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):
         self.x_pos = x_coord
         self.y_pos = y_coord
@@ -96,7 +103,7 @@ class Ghost:
         self.id = id
         self.turns, self.in_box = self.check_collisions()
         self.rect = self.draw()
-
+#hierin wordt de ghost getekend wanneer ze levend zijn, bang zijn na het eten van een powerup, of wanneer de ghost dood zijn
     def draw(self):
         if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
             screen.blit(self.img, (self.x_pos, self.y_pos))
@@ -107,12 +114,17 @@ class Ghost:
         ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36))
         return ghost_rect
 
+    #controleert waar het spook naartoe kan bewegen
     def check_collisions(self):
         # R, L, U, D
         num1 = ((HEIGHT - 50) // 32)
         num2 = (WIDTH // 30)
         num3 = 15
+
+        #normaal kan het spook nergens heen, totdat de functie bepaalt welke richtingen wél mogelijk zijn
         self.turns = [False, False, False, False]
+
+        #gecontroleerd of het spook zich binnen de grenzen van de map bevindt
         if 0 < self.center_x // 30 < 29:
             if level[(self.center_y - num3) // num1][self.center_x // num2] == 9:
                 self.turns[2] = True
